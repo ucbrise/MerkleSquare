@@ -1,0 +1,292 @@
+syntax = "proto3";
+
+package grpcint;
+
+message EncryptionKey {
+    bytes ek = 1;
+}
+
+message MasterKey {
+    bytes mk = 1;
+}
+
+message Hash {
+    bytes hash = 1;
+}
+
+// TODO: how to index in the KT?
+message Username {
+    bytes username = 1;
+}
+
+message OrganizationName {
+    Hash hash_name = 1;
+}
+
+message Position {
+    uint64 pos = 1;
+}
+
+message IndexedEK {
+    EncryptionKey public_key = 1;
+    Position pos = 2;
+}
+
+message IndexedMK {
+    MasterKey master_key = 1;
+    Position pos = 2;
+}
+
+message MerklePath {
+    repeated Hash nodes = 1;
+}
+
+message MerkleProof {
+    MerklePath copath = 1;
+
+    enum MerkleProofType {
+        Membership = 0;
+        NonMembership = 1;
+    }
+
+    MerkleProofType proof_type = 2;
+
+    //NOTE: This can be removed if we want to further reduce the proof size.
+    // Indicate the interval of the CT if needed.
+    Position start_pos = 3;
+    Position end_pos = 4;
+}
+
+message RegisterProof {
+    repeated MerkleProof kt_path = 1;
+}
+
+message LookUpProof {
+    repeated MerkleProof kt_path = 1;
+    repeated IndexedEK ek_list = 2;
+}
+
+message AppendProof {
+    // Used to verify each KT root is included in the CT tree.
+    MerkleProof ct_path = 1;
+    repeated MerkleProof kt_path = 2;
+
+    //NOTE: This can be removed if we want to reduce append proof size.
+    uint64 height = 3;
+}
+
+message RootHash {
+    Hash root_hash = 1;
+
+    //NOTE: This can be removed if we want to further reduce the proof size.
+    Position start_pos = 3;
+    Position end_pos = 4;
+}
+
+message CheckPoint {
+    bytes marshaled_digest = 1;
+    uint64 num_leaves = 2;
+    uint64 epoch = 3;
+}
+
+message ExtensionProof {
+    MerkleProof ct_path = 1;
+    repeated RootHash root_list = 2;
+}
+
+service MerkleSquare {
+    // Client-Server API
+    rpc Register(RegisterRequest) returns (RegisterResponse) {}
+    rpc Append(stream AppendRequest) returns (stream AppendResponse) {}
+    rpc LookUpMK(LookUpMKRequest) returns (LookUpMKResponse) {}
+    rpc LookUpPK(LookUpPKRequest) returns (LookUpPKResponse) {}
+    rpc LookUpMKVerify(LookUpMKVerifyRequest) returns (LookUpMKVerifyResponse) {}
+    rpc LookUpPKVerify(LookUpPKVerifyRequest) returns (LookUpPKVerifyResponse) {}
+
+    rpc GetMonitoringProofForTest(GetMonitoringProofForTestRequest) returns (GetMonitoringProofForTestResponse) {}
+
+    // Verifier-Server API
+    rpc GetMasterKeyProof(GetMasterKeyProofRequest) returns (GetMasterKeyProofResponse) {}
+    rpc GetPublicKeyProof(GetPublicKeyProofRequest) returns (GetPublicKeyProofResponse) {}
+    rpc GetLookUpProof(GetLookUpProofRequest) returns (GetLookUpProofResponse) {}
+
+    // Auditor Interface
+    rpc GetNewCheckPoint(GetNewCheckPointRequest) returns (GetNewCheckPointResponse) {}
+}
+
+message GetMonitoringProofForTestRequest {
+    Username usr = 1;
+    Position pos = 2;
+    uint32 height = 3;
+    uint64 size = 4;
+}
+
+message GetMonitoringProofForTestResponse {
+    bytes proof = 1;
+}
+
+service Auditor {
+    // Auditor-Client-Server API
+    rpc GetEpochUpdate(GetEpochUpdateRequest) returns (GetEpochUpdateResponse) {}
+}
+
+service Verifier {
+    rpc VerifyRegisterAsync(VerifyRegisterRequest) returns (VerifyRegisterResponse) {}
+    rpc VerifyAppendAsync(VerifyAppendRequest) returns (VerifyAppendResponse) {}
+    rpc VerifyLookUpAsync(VerifyLookUpRequest) returns (VerifyLookUpResponse) {}
+}
+
+message RegisterRequest {
+    Username usr = 1;
+    MasterKey key = 2;
+    bytes signature = 3;
+}
+
+message RegisterResponse {
+    bytes vrf_key = 1;
+    Position pos = 2;
+}
+
+message AppendRequest {
+    Username usr = 1;
+    EncryptionKey ek = 2;
+    bytes signature = 3;
+}
+
+message AppendResponse {
+    Position pos = 1;
+    bytes vrf_key = 2;
+    bool completed = 3;
+}
+
+message LookUpMKRequest {
+    Username usr = 1;
+}
+
+message LookUpMKResponse {
+    IndexedMK imk = 1;
+    bytes signature = 2;
+    bytes vrf_key = 3;
+}
+
+message LookUpMKVerifyRequest {
+    Username usr = 1;
+    uint64 size = 2;
+}
+
+message LookUpMKVerifyResponse {
+    IndexedMK imk = 1;
+    bytes signature = 2;
+    bytes vrf_key = 3;
+    bytes proof = 4;
+}
+
+message LookUpPKRequest {
+    Username usr = 1;
+    Position pos = 2;
+}
+
+message LookUpPKResponse {
+    IndexedEK iek = 1;
+    bytes signature = 2;
+    bytes vrf_key = 3;
+}
+
+message LookUpPKVerifyRequest {
+    Username usr = 1;
+    uint64 size = 2;
+}
+
+message LookUpPKVerifyResponse {
+    IndexedEK iek = 1;
+    bytes signature = 2;
+    bytes vrf_key = 3;
+    bytes proof = 4;
+}
+
+message GetMasterKeyProofRequest {
+    Username usr = 1;
+    MasterKey key = 2;
+    Position pos = 3;
+    uint64 size = 4;
+}
+
+message GetMasterKeyProofResponse {
+    bytes proof = 1;
+}
+
+message GetPublicKeyProofRequest {
+    Username usr = 1;
+    EncryptionKey key = 2;
+    Position pos = 3;
+    uint32 height = 4;
+    uint64 size = 5;
+}
+
+message GetPublicKeyProofResponse {
+    bytes proof = 1;
+}
+
+message GetLookUpProofRequest {
+    bool is_master_key = 1;
+    Username usr = 2;
+    MasterKey master_key = 3;
+    EncryptionKey encryption_key = 4;
+    Position pos = 5;
+    uint64 size = 6;
+}
+
+message GetLookUpProofResponse {
+    bytes proof = 1;
+}
+
+message VerifyRegisterRequest {
+    Username usr = 1;
+    bytes vrf_key = 2;
+    MasterKey key = 3;
+    bytes signature = 4;
+    Position pos = 5;
+}
+
+message VerifyRegisterResponse {
+}
+
+message VerifyAppendRequest {
+    Username usr = 1;
+    bytes vrf_key = 2;
+    EncryptionKey key = 3;
+    bytes signature = 4;
+    Position pos = 5;
+}
+
+message VerifyAppendResponse {
+}
+
+message VerifyLookUpRequest {
+    bool is_master_key = 1;
+    Username usr = 2;
+    bytes vrf = 3;
+    MasterKey master_key = 4;
+    EncryptionKey encryption_key = 5;
+    bytes signature = 6;
+    Position pos = 7;
+}
+
+message VerifyLookUpResponse {
+}
+
+message GetNewCheckPointRequest {
+    uint64 old_size = 1;
+}
+
+message GetNewCheckPointResponse {
+    CheckPoint ck_point = 1;
+    bytes proof = 2;
+}
+
+message GetEpochUpdateRequest {
+}
+
+message GetEpochUpdateResponse {
+    CheckPoint ck_point = 1;
+}
