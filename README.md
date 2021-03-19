@@ -1,7 +1,7 @@
 <h1 align="center">MerkleSquare</h1>
 
 <p align="center">
-    <a href="https://github.com/ucbrise/MerkleSquare/blob/release/LICENSE"><img src="https://img.shields.io/badge/license-APACHE-blue.svg"></a>
+    <a href="https://github.com/ucbrise/MerkleSquare/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-APACHE-blue.svg"></a>
 </p>
 
 `MerkleSquare` is a Go library that implements
