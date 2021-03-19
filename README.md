@@ -76,7 +76,7 @@ $ go test -v
 
 This library is licensed under either of the following licenses, at your discretion.
 
- * [Apache License Version 2.0](LICENSE-APACHE)
+ * [Apache License Version 2.0](LICENSE)
 
 Unless you explicitly state otherwise, any contribution that you submit to this library shall be dual licensed as above (as defined in the Apache v2 License), without any additional terms or conditions.
 
