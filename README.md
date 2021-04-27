@@ -9,6 +9,8 @@
 <b>Merkle<sup>2</sup>: A Low-Latency Transparency Log System</b>
 </p>
 
+[MerkleSquare]: https://eprint.iacr.org/2021/453
+
 This library was initially developed as part of the [Merkle<sup>2</sup>][MerkleSquare] paper, and is released under the Apache v2 License (see [License](#license)).
 
 **WARNING:** This is an academic prototype, and has not received careful code review. This implementation is NOT ready for production use.
@@ -80,7 +82,6 @@ This library is licensed under either of the following licenses, at your discret
 
 Unless you explicitly state otherwise, any contribution that you submit to this library shall be dual licensed as above (as defined in the Apache v2 License), without any additional terms or conditions.
 
-[MerkleSquare]: https://eprint.iacr.org/2021/453
 
 ## Reference paper
 
