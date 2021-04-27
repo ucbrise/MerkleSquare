@@ -80,7 +80,7 @@ This library is licensed under either of the following licenses, at your discret
 
 Unless you explicitly state otherwise, any contribution that you submit to this library shall be dual licensed as above (as defined in the Apache v2 License), without any additional terms or conditions.
 
-[MerkleSquare]: https://
+[MerkleSquare]: https://eprint.iacr.org/2021/453
 
 ## Reference paper
 
